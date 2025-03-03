@@ -1,0 +1,78 @@
+version: '3.8'
+services:
+  kafka-1:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-1
+    ports:
+      - "9091:9091"
+    environment:
+      KAFKA_CLUSTER_ID: "N3PXL8oNTOuTbsf9lIysYw"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: INTERNAL://kafka-1:9091,EXTERNAL://localhost:9091
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9091,EXTERNAL://localhost:9091
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-1:9091,2@kafka-2:9092,3@kafka-3:9093"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: INTERNAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+  kafka-2:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-2
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_CLUSTER_ID: "N3PXL8oNTOuTbsf9lIysYw"
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENERS: INTERNAL://kafka-2:9092,EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:9092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-1:9091,2@kafka-2:9092,3@kafka-3:9093"
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_CONTROLLER_LISTENER_NAMES: INTERNAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+  kafka-3:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-3
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_CLUSTER_ID: "N3PXL8oNTOuTbsf9lIysYw"
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENERS: INTERNAL://kafka-3:9093,EXTERNAL://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-3:9093,EXTERNAL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-1:9091,2@kafka-2:9092,3@kafka-3:9093"
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_CONTROLLER_LISTENER_NAMES: INTERNAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    ports:
+      - "9308:9308"
+    environment:
+      KAFKA_SERVER: "kafka-1:9091,kafka-2:9092,kafka-3:9093"
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
