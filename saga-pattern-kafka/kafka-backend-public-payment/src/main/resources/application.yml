@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: kafka-backend-public
+  #DBS
+  datasource:
+    hikari:
+      maximum-pool-size: 20  # Số lượng tối đa kết nối
+      minimum-idle: 5        # Số lượng kết nối tối thiểu trong pool
+    url: jdbc:mysql://localhost:3316/vetautet
+    username: root
+    password: root1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: update  # Không tự động tạo/ cập nhật bảng thay vì update
+
+  jackson:
+    serialization:
+      indent-output: true
+  kafka:
+    bootstrap-servers: localhost:9193  # Assuming container name is kafka1
+    producer:
+      retries: 0
+      batch-size: 16384
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer #org.apache.kafka.common.serialization.StringSerializer
+#      properties:
+#        partitioner.class: com.kafka.howtosend.CustomPartitioner
+#        linger.ms: 10 # Thời gian chờ 10ms trước khi gửi batch
+    consumer:
+      group-id: myGroup
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      auto-commit-interval: 100
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#    listener:
+#      missing-topics-fatal: false
+#      ack-mode: manual_immediate #Commit ngay lập tức khi gọi acknowledgment.acknowledge().
+  threads:
+    virtual:
+      enabled: true
+server:
+  port: 8889
+
